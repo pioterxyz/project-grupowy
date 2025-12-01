@@ -1,2 +1,8 @@
 git config --local user.name "name"
 git config --local user.email "email"
+
+
+    const [page,setPage] = useState(1)
+  <button onClick={() => setPage((prev) => prev-1)}>⬅️ Poprzednia</button>
+            <p>Strona: {page}</p>
+            <button onClick={() => setPage((prev) => prev+1)}>Następna ➡️</button>
