@@ -1,0 +1,204 @@
+src/
+│ App.jsx
+│ index.jsx
+│ index.css
+│
+├── components/
+│   ├── Navbar.jsx
+│   ├── SearchBar.jsx
+│   └── ItemCard.jsx
+│
+├── pages/
+│   ├── Home.jsx
+│   └── Details.jsx
+│
+├── context/
+│   └── DataContext.jsx
+│
+├── services/
+│   └── api.js
+│
+└── assets/
+    └── (opcjonalnie grafiki)
+
+
+
+navbar jsx
+export default function Navbar() {
+  return (
+    <nav className="bg-blue-600 text-white px-6 py-3 text-xl font-semibold">
+      Simple Data Explorer
+    </nav>
+  );
+}
+
+
+searchbar jsx 
+export default function SearchBar({ value, onChange }) {
+  return (
+    <input
+      type="text"
+      placeholder="Search..."
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full p-2 border rounded-md shadow mb-4"
+    />
+  );
+}
+
+
+itemcard jsx
+import { Link } from "react-router-dom";
+
+export default function ItemCard({ item }) {
+  return (
+    <Link
+      to={`/details/${item.name}`}
+      className="border rounded-md p-4 shadow hover:bg-gray-100 transition"
+    >
+      <h3 className="text-lg font-bold capitalize">{item.name}</h3>
+    </Link>
+  );
+}
+
+
+app jsx
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import Details from "./pages/Details";
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Navbar />
+      <div className="p-6">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/details/:name" element={<Details />} />
+          <Route path="*" element={<h1 className="text-3xl">404 - Not Found</h1>} />
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
+}
+
+datacontext jsx
+import { createContext, useContext, useEffect, useState } from "react";
+import { fetchPokemonList } from "../services/api";
+
+const DataContext = createContext();
+export const useData = () => useContext(DataContext);
+
+export default function DataProvider({ children }) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPokemonList().then((data) => {
+      setItems(data.results);
+      setLoading(false);
+    });
+  }, []);
+
+  return (
+    <DataContext.Provider value={{ items, loading }}>
+      {children}
+    </DataContext.Provider>
+  );
+}
+
+
+index jsx
+import DataProvider from "./context/DataContext";
+
+root.render(
+  <DataProvider>
+    <App />
+  </DataProvider>
+);
+
+
+api js
+
+const API_BASE = "https://pokeapi.co/api/v2/pokemon";
+
+export const fetchPokemonList = async () => {
+  const res = await fetch(`${API_BASE}?limit=151`);
+  return res.json();
+};
+
+export const fetchPokemonDetails = async (name) => {
+  const res = await fetch(`${API_BASE}/${name}`);
+  return res.json();
+};
+
+home jsx
+
+import { useState } from "react";
+import { useData } from "../context/DataContext";
+import SearchBar from "../components/SearchBar";
+import ItemCard from "../components/ItemCard";
+
+export default function Home() {
+  const { items, loading } = useData();
+  const [search, setSearch] = useState("");
+
+  if (loading) return <p>Loading...</p>;
+
+  const filtered = items.filter((el) =>
+    el.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div>
+      <SearchBar value={search} onChange={setSearch} />
+
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {filtered.map((item) => (
+          <ItemCard key={item.name} item={item} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+
+details jsx
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { fetchPokemonDetails } from "../services/api";
+
+export default function Details() {
+  const { name } = useParams();
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetchPokemonDetails(name).then(setData);
+  }, [name]);
+
+  if (!data) return <p>Loading...</p>;
+
+  return (
+    <div className="max-w-md mx-auto p-4 border shadow rounded-md">
+      <h1 className="text-3xl font-bold capitalize mb-4">{data.name}</h1>
+      <img
+        src={data.sprites.front_default}
+        alt={data.name}
+        className="w-40 mx-auto"
+      />
+
+      <h2 className="text-xl mt-4 font-semibold">Stats:</h2>
+      <ul className="mt-2">
+        {data.stats.map((s) => (
+          <li key={s.stat.name}>
+            {s.stat.name}: <b>{s.base_stat}</b>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+
