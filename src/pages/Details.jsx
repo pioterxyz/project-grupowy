@@ -1,20 +1,23 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { fetchPokemonDetails } from "../services/api";
 
 export default function Details() {
   const { name } = useParams();
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchPokemonDetails(name).then(setData);
+    setLoading(true)
+    fetchPokemonDetails(name).catch((error) => navigate('/not-found')).then(setData).finally(() => setLoading(false));
   }, [name]);
 
-  if (!data) return <p>Loading...</p>;
+  if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="max-w-md mx-auto p-4 border shadow rounded-md">
-      <h1 className="text-3xl font-bold capitalize mb-4">{data.name}</h1>
+    data ? <div className="max-w-md mx-auto p-4 border shadow rounded-md">
+      < h1 className="text-3xl font-bold capitalize mb-4" > {data.name}</h1 >
       <img
         src={data.sprites.front_default}
         alt={data.name}
@@ -29,6 +32,7 @@ export default function Details() {
           </li>
         ))}
       </ul>
-    </div>
+    </div > : <div>Podany pokemon nie istnieje</div>
+
   );
 }
