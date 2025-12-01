@@ -7,7 +7,7 @@ export default function Home() {
   const { items, loading } = useData();
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
+  const itemsPerPage = 36;
   const [goPage, setGoPage] = useState("");
 
   if (loading) return <p>Loading...</p>;
