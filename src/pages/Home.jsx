@@ -6,6 +6,8 @@ import ItemCard from "../components/ItemCard";
 export default function Home() {
   const { items, loading } = useData();
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   if (loading) return <p>Loading...</p>;
 
@@ -13,13 +15,31 @@ export default function Home() {
     .filter((el) => el.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => a.name.localeCompare(b.name));
 
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filtered.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
   return (
     <div>
       <SearchBar value={search} onChange={setSearch} />
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {filtered.map((item) => (
+        {currentItems.map((item) => (
           <ItemCard key={item.name} item={item} />
+        ))}
+      </div>
+      <div className="flex gap-2 justify-center mt-6">
+        {Array.from({ length: totalPages }, (_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentPage(i + 1)}
+            className={`px-3 py-1 border rounded 
+              ${currentPage === i + 1 ? "bg-blue-500 text-white" : "bg-white text-black"}`}
+          >
+            {i + 1}
+          </button>
         ))}
       </div>
     </div>
