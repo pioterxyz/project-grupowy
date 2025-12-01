@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { fetchPokemonList } from "../services/api";
 
 const DataContext = createContext();
-
 export const useData = () => useContext(DataContext);
 
 export default function DataProvider({ children }) {
@@ -22,4 +21,3 @@ export default function DataProvider({ children }) {
     </DataContext.Provider>
   );
 }
-

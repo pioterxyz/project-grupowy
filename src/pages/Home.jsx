@@ -9,9 +9,9 @@ export default function Home() {
 
   if (loading) return <p>Loading...</p>;
 
-  const filtered = items.filter((el) =>
-    el.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = items
+    .filter((el) => el.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div>
